@@ -50,10 +50,10 @@
                         </select>
                         <div class="invalid-feedback">Please choose a category.</div>
                     </div>
-                    <div id="successAlert" class="alert alert-success d-none" role="alert">Registration submitted successfully!</div>
+                    <div id="successAlert" class="alert alert-success d-none" role="alert" aria-live="polite">Registration submitted successfully!</div>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="submit" class="btn btn-warning text-dark fw-semibold">Submit</button>
-                        <a href="index.html" id="backToHomeBtn" class="btn btn-outline-light">Back</a>
+                        <a href="index.html" id="backToHomeBtn" class="btn btn-outline-light">Back to Event Information</a>
                     </div>
                 </form>
             </div>
@@ -87,7 +87,8 @@
                 setState('email', true);
             }
 
-            if (!/^\d+$/.test(phone.trim())) {
+            const trimmedPhone = phone.trim();
+            if (!/^\d+$/.test(trimmedPhone) || trimmedPhone.length < 10) {
                 setState('phone', false);
                 valid = false;
             } else {
