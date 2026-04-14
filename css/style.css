@@ -9,12 +9,16 @@ body,
     background: rgba(15, 23, 42, 0.9) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     color: #f8fafc !important;
+    background-image: url(https://media.istockphoto.com/id/2186585249/photo/gamer-work-space-concept-top-view-a-gaming-gear-mouse-keyboard-joystick-headset-mobile.webp?a=1&b=1&s=612x612&w=0&k=20&c=y6UV2G0nhTQ4rFKp6neqpGdHq72quO69KkIBZ8qHUgw=) !important;
+    background: no-repeat;
+    background-size: cover !important;    
 }
 
 .event-header h1,
 .event-header p {
     color: #f8fafc !important;
     margin: 0;
+    font-size: 23px;
 }
 
 .ui-content {
@@ -24,6 +28,13 @@ body,
 .card {
     background: rgba(30, 41, 59, 0.92);
     color: #f8fafc;
+    transition: 0.5s;
+    border-radius: 20px;
+}
+
+.card:hover{
+    transform: translateY(-10px);
+    box-shadow: 0 0 15px aqua !important;
 }
 
 .card .card-img-top {
