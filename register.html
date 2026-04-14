@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Validation Lab</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="p-5">
+    <h2>Lab Task 3.3: Form Validation Example</h2>
+    <form id="myForm" class="mt-4" novalidate>
+        <div class="mb-3">
+            <label for="Full name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="fullName" placeholder="Enter full name" required>
+            <div class="invalid-feedback">Sila masukkan nama penuh.</div>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter email" required>
+            <div class="invalid-feedback">Sila masukkan email yang sah.</div>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone" placeholder="Enter phone number" required>
+            <div class="invalid-feedback">Sila masukkan nombor telefon yang sah.</div>
+        </div>
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" required>
+                <option value="" selected disabled>Please select a category</option>
+                <option value="1">Student</option>
+                <option value="2">Visitor</option>
+                <option value="3">Lecturer</option>
+            </select>
+            <div class="invalid-feedback">Sila pilih kategori.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <!-- Bootstrap JS (for modal, tooltip etc.) -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const form = document.getElementById('myForm');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // block default submit
+            let valid = true;
+            const fullName = document.getElementById('fullName');
+            const email = document.getElementById('email');
+            const phone = document.getElementById('phone');
+            const category = document.getElementById('category');
+            // Full Name validation
+            if (fullName.value.trim() === '') {
+                fullName.classList.add('is-invalid');
+                valid = false;
+            } else {
+                fullName.classList.remove('is-invalid');
+                fullName.classList.add('is-valid');
+            }
+            // Email validation
+            if (!email.value.includes('@')) {
+                email.classList.add('is-invalid');
+                valid = false;
+            } else {
+                email.classList.remove('is-invalid');
+                email.classList.add('is-valid');
+            }
+            // Phone Number validation
+            if (phone.value.length < 10 || !/^\d+$/.test(phone.value)) {
+                phone.classList.add('is-invalid');
+                valid = false;
+            } else {
+                phone.classList.remove('is-invalid');
+                phone.classList.add('is-valid');
+            }
+            // Category validation
+            if (category.value === '') {
+                category.classList.add('is-invalid');
+                valid = false;
+            } else {
+                category.classList.remove('is-invalid');
+                category.classList.add('is-valid');
+            }
+            if (valid) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'alert alert-success mt-3';
+                successDiv.innerText = 'Form submitted successfully!';
+                form.appendChild(successDiv);
+                setTimeout(() => {
+                    form.reset();
+                    fullName.classList.remove('is-valid');
+                    email.classList.remove('is-valid');
+                    phone.classList.remove('is-valid');
+                    category.classList.remove('is-valid');
+                    successDiv.remove();
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+
+</html>
