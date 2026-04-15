@@ -123,7 +123,13 @@
         }
 
         if (window.jQuery) {
-            $(document).on('pagecreate', '#registerPage', function () {
+            function initializeRegisterPage() {
+                const registerPage = $('#registerPage');
+                if (!registerPage.length || registerPage.data('registrationInitialized')) {
+                    return;
+                }
+                registerPage.data('registrationInitialized', true);
+
                 const localSupabaseConfig = window.SUPABASE_LOCAL_CONFIG || {};
                 const injectedSupabaseUrl = '__SUPABASE_URL__';
                 const injectedSupabaseAnonKey = '__SUPABASE_ANON_KEY__';
@@ -296,38 +302,100 @@
                         window.location.href = 'index.html';
                     }
                 });
-            });
+            }
+
+            $(document).on('pagecreate', '#registerPage', initializeRegisterPage);
+            $(initializeRegisterPage);
         } else {
-            document.getElementById('registrationForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const form = this;
-                const valid = validateFormElements(
-                    function (id) { return document.getElementById(id).value; },
-                    function (id, isValid) {
-                        const field = document.getElementById(id);
-                        field.classList.toggle('is-invalid', !isValid);
-                        field.classList.toggle('is-valid', isValid);
-                    }
-                );
+            const registerPage = document.getElementById('registerPage');
+            const successModal = document.getElementById('registrationSuccessModal');
+            const closeSuccessModalBtn = document.getElementById('closeSuccessModalBtn');
+            const registrationForm = document.getElementById('registrationForm');
+            const backToHomeBtn = document.getElementById('backToHomeBtn');
 
-                const successAlert = document.getElementById('successAlert');
-                const errorAlert = document.getElementById('errorAlert');
-                if (valid) {
-                    errorAlert.classList.add('d-none');
-                    successAlert.classList.remove('d-none');
-                    form.reset();
-                    form.querySelectorAll('.is-valid').forEach(function (el) {
-                        el.classList.remove('is-valid');
-                    });
-                } else {
-                    successAlert.classList.add('d-none');
-                    errorAlert.classList.add('d-none');
+            if (registerPage && successModal && closeSuccessModalBtn && registrationForm && backToHomeBtn) {
+                let previousFocusedElement = null;
+
+                function canReceiveFocus(element) {
+                    return Boolean(
+                        element &&
+                        typeof element.focus === 'function' &&
+                        !element.hasAttribute('disabled') &&
+                        element.getAttribute('aria-hidden') !== 'true' &&
+                        element.tabIndex >= -1 &&
+                        element.getClientRects().length > 0
+                    );
                 }
-            });
 
-            document.getElementById('backToHomeBtn').addEventListener('click', function () {
-                window.location.href = 'index.html';
-            });
+                function showSuccessModal() {
+                    const activeElement = document.activeElement;
+                    previousFocusedElement = activeElement && activeElement !== document.body ? activeElement : null;
+                    registerPage.classList.add('page-blur');
+                    successModal.style.display = 'flex';
+                    successModal.setAttribute('aria-hidden', 'false');
+                    closeSuccessModalBtn.focus();
+                }
+
+                function hideSuccessModal() {
+                    successModal.style.display = 'none';
+                    successModal.setAttribute('aria-hidden', 'true');
+                    registerPage.classList.remove('page-blur');
+
+                    if (previousFocusedElement && document.body.contains(previousFocusedElement) && canReceiveFocus(previousFocusedElement)) {
+                        previousFocusedElement.focus();
+                    } else {
+                        const submitButton = registrationForm.querySelector('[type="submit"]');
+                        if (canReceiveFocus(submitButton)) {
+                            submitButton.focus();
+                        }
+                    }
+                }
+
+                registrationForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const form = this;
+                    const valid = validateFormElements(
+                        function (id) { return document.getElementById(id).value; },
+                        function (id, isValid) {
+                            const field = document.getElementById(id);
+                            field.classList.toggle('is-invalid', !isValid);
+                            field.classList.toggle('is-valid', isValid);
+                        }
+                    );
+
+                    const errorAlert = document.getElementById('errorAlert');
+                    if (valid) {
+                        errorAlert.classList.add('d-none');
+                        errorAlert.textContent = '';
+                        form.reset();
+                        form.querySelectorAll('.is-valid').forEach(function (el) {
+                            el.classList.remove('is-valid');
+                        });
+                        showSuccessModal();
+                    } else {
+                        errorAlert.classList.add('d-none');
+                        errorAlert.textContent = '';
+                    }
+                });
+
+                closeSuccessModalBtn.addEventListener('click', hideSuccessModal);
+
+                successModal.addEventListener('click', function (event) {
+                    if (event.target === successModal) {
+                        hideSuccessModal();
+                    }
+                });
+
+                if (!window.__registerSuccessModalEscHandler) {
+                    window.__registerSuccessModalEscHandler = function (event) {
+                        if (event.key === 'Escape' && successModal.getAttribute('aria-hidden') === 'false') {
+                            hideSuccessModal();
+                        }
+                    };
+                    document.addEventListener('keyup', window.__registerSuccessModalEscHandler);
+                }
+
+            }
         }
     </script>
 </body>
