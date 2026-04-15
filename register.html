@@ -123,7 +123,13 @@
         }
 
         if (window.jQuery) {
-            $(document).on('pagecreate', '#registerPage', function () {
+            function initializeRegisterPage() {
+                const registerPage = $('#registerPage');
+                if (!registerPage.length || registerPage.data('registrationInitialized')) {
+                    return;
+                }
+                registerPage.data('registrationInitialized', true);
+
                 const localSupabaseConfig = window.SUPABASE_LOCAL_CONFIG || {};
                 const injectedSupabaseUrl = '__SUPABASE_URL__';
                 const injectedSupabaseAnonKey = '__SUPABASE_ANON_KEY__';
@@ -296,8 +302,27 @@
                         window.location.href = 'index.html';
                     }
                 });
-            });
+            }
+
+            $(document).on('pagecreate', '#registerPage', initializeRegisterPage);
+            $(initializeRegisterPage);
         } else {
+            const registerPage = document.getElementById('registerPage');
+            const successModal = document.getElementById('registrationSuccessModal');
+            const closeSuccessModalBtn = document.getElementById('closeSuccessModalBtn');
+
+            function showSuccessModal() {
+                registerPage.classList.add('page-blur');
+                successModal.style.display = 'flex';
+                successModal.setAttribute('aria-hidden', 'false');
+            }
+
+            function hideSuccessModal() {
+                successModal.style.display = 'none';
+                successModal.setAttribute('aria-hidden', 'true');
+                registerPage.classList.remove('page-blur');
+            }
+
             document.getElementById('registrationForm').addEventListener('submit', function (event) {
                 event.preventDefault();
                 const form = this;
@@ -314,14 +339,29 @@
                 const errorAlert = document.getElementById('errorAlert');
                 if (valid) {
                     errorAlert.classList.add('d-none');
-                    successAlert.classList.remove('d-none');
+                    successAlert.classList.add('d-none');
                     form.reset();
                     form.querySelectorAll('.is-valid').forEach(function (el) {
                         el.classList.remove('is-valid');
                     });
+                    showSuccessModal();
                 } else {
                     successAlert.classList.add('d-none');
                     errorAlert.classList.add('d-none');
+                }
+            });
+
+            closeSuccessModalBtn.addEventListener('click', hideSuccessModal);
+
+            successModal.addEventListener('click', function (event) {
+                if (event.target === successModal) {
+                    hideSuccessModal();
+                }
+            });
+
+            document.addEventListener('keyup', function (event) {
+                if (event.key === 'Escape' && successModal.style.display !== 'none') {
+                    hideSuccessModal();
                 }
             });
 
