@@ -183,14 +183,54 @@
                     const submitButton = $(form).find('button[type="submit"]');
                     submitButton.prop('disabled', true).text('Submitting...');
                     hideError();
+                    
+                    //check duplicated data before insert to provide more specific feedback to users and avoid relying solely on database constraints for error handling
+                    try { 
+                        const fullName = $('#fullName').val().trim();
+                        const email = $('#email').val().trim().toLowerCase();
+                        const phone = Number($('#phone').val().trim());
+                        const institution = $('#institution').val().trim();
+                        const password = $('#password').val().trim();
 
-                    try {
+                        const [nameCheck, emailCheck, phoneCheck] = await Promise.all([
+                            supabaseClient.from('users_profile').select('id').eq('full_name', fullName).limit(1),
+                            supabaseClient.from('users_profile').select('id').ilike('email', email).limit(1),
+                            supabaseClient.from('users_profile').select('id').eq('phone', phone).limit(1)
+                        ]);
+
+                        const duplicateCheckError = nameCheck.error || emailCheck.error || phoneCheck.error;
+                        if (duplicateCheckError) {
+                            throw duplicateCheckError;
+                        }
+
+                        const duplicateMessages = [];
+
+                        if (nameCheck.data && nameCheck.data.length > 0) {
+                            $('#fullName').addClass('is-invalid').removeClass('is-valid');
+                            duplicateMessages.push('Full name already exists.');
+                        }
+
+                        if (emailCheck.data && emailCheck.data.length > 0) {
+                            $('#email').addClass('is-invalid').removeClass('is-valid');
+                            duplicateMessages.push('Email already exists.');
+                        }
+
+                        if (phoneCheck.data && phoneCheck.data.length > 0) {
+                            $('#phone').addClass('is-invalid').removeClass('is-valid');
+                            duplicateMessages.push('Phone number already exists.');
+                        }
+
+                        if (duplicateMessages.length > 0) {
+                            showError('Account already exists: ' + duplicateMessages.join(' '));
+                            return;
+                        }
+
                         const payload = {
-                            full_name: $('#fullName').val().trim(),
-                            email: $('#email').val().trim(),
-                            phone: Number($('#phone').val().trim()),
-                            institution: $('#institution').val().trim(),
-                            password: $('#password').val().trim()
+                            full_name: fullName,
+                            email: email,
+                            phone: phone,
+                            institution: institution,
+                            password: password
                         };
 
                         const { error } = await supabaseClient.from('users_profile').insert([payload]);
@@ -204,7 +244,16 @@
                     } catch (error) {
                         console.error('Supabase registration insert failed:', error);
                         if (error && error.code === '23505') {
-                            showError('This email is already registered. Please use a different email.');
+                            const details = String(error.details || '').toLowerCase();
+                            if (details.includes('email')) {
+                                showError('Email already exists. Please use a different email.');
+                            } else if (details.includes('phone')) {
+                                showError('Phone number already exists. Please use a different phone number.');
+                            } else if (details.includes('full_name')) {
+                                showError('Full name already exists. Please check your details.');
+                            } else {
+                                showError('Account data already exists. Please use different details.');
+                            }
                         } else {
                             showError('Unable to submit registration right now. Please try again later.');
                         }
