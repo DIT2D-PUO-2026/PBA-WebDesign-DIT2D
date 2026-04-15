@@ -310,64 +310,68 @@
             const registerPage = document.getElementById('registerPage');
             const successModal = document.getElementById('registrationSuccessModal');
             const closeSuccessModalBtn = document.getElementById('closeSuccessModalBtn');
+            const registrationForm = document.getElementById('registrationForm');
+            const backToHomeBtn = document.getElementById('backToHomeBtn');
 
-            function showSuccessModal() {
-                registerPage.classList.add('page-blur');
-                successModal.style.display = 'flex';
-                successModal.setAttribute('aria-hidden', 'false');
-            }
+            if (registerPage && successModal && closeSuccessModalBtn && registrationForm && backToHomeBtn) {
+                function showSuccessModal() {
+                    registerPage.classList.add('page-blur');
+                    successModal.style.display = 'flex';
+                    successModal.setAttribute('aria-hidden', 'false');
+                }
 
-            function hideSuccessModal() {
-                successModal.style.display = 'none';
-                successModal.setAttribute('aria-hidden', 'true');
-                registerPage.classList.remove('page-blur');
-            }
+                function hideSuccessModal() {
+                    successModal.style.display = 'none';
+                    successModal.setAttribute('aria-hidden', 'true');
+                    registerPage.classList.remove('page-blur');
+                }
 
-            document.getElementById('registrationForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const form = this;
-                const valid = validateFormElements(
-                    function (id) { return document.getElementById(id).value; },
-                    function (id, isValid) {
-                        const field = document.getElementById(id);
-                        field.classList.toggle('is-invalid', !isValid);
-                        field.classList.toggle('is-valid', isValid);
+                registrationForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const form = this;
+                    const valid = validateFormElements(
+                        function (id) { return document.getElementById(id).value; },
+                        function (id, isValid) {
+                            const field = document.getElementById(id);
+                            field.classList.toggle('is-invalid', !isValid);
+                            field.classList.toggle('is-valid', isValid);
+                        }
+                    );
+
+                    const errorAlert = document.getElementById('errorAlert');
+                    if (valid) {
+                        errorAlert.classList.add('d-none');
+                        form.reset();
+                        form.querySelectorAll('.is-valid').forEach(function (el) {
+                            el.classList.remove('is-valid');
+                        });
+                        showSuccessModal();
+                    } else {
+                        errorAlert.classList.add('d-none');
                     }
-                );
+                });
 
-                const successAlert = document.getElementById('successAlert');
-                const errorAlert = document.getElementById('errorAlert');
-                if (valid) {
-                    errorAlert.classList.add('d-none');
-                    successAlert.classList.add('d-none');
-                    form.reset();
-                    form.querySelectorAll('.is-valid').forEach(function (el) {
-                        el.classList.remove('is-valid');
-                    });
-                    showSuccessModal();
-                } else {
-                    successAlert.classList.add('d-none');
-                    errorAlert.classList.add('d-none');
+                closeSuccessModalBtn.addEventListener('click', hideSuccessModal);
+
+                successModal.addEventListener('click', function (event) {
+                    if (event.target === successModal) {
+                        hideSuccessModal();
+                    }
+                });
+
+                if (!window.__registerSuccessModalEscHandler) {
+                    window.__registerSuccessModalEscHandler = function (event) {
+                        if (event.key === 'Escape' && successModal.getAttribute('aria-hidden') === 'false') {
+                            hideSuccessModal();
+                        }
+                    };
+                    document.addEventListener('keyup', window.__registerSuccessModalEscHandler);
                 }
-            });
 
-            closeSuccessModalBtn.addEventListener('click', hideSuccessModal);
-
-            successModal.addEventListener('click', function (event) {
-                if (event.target === successModal) {
-                    hideSuccessModal();
-                }
-            });
-
-            document.addEventListener('keyup', function (event) {
-                if (event.key === 'Escape' && successModal.style.display !== 'none') {
-                    hideSuccessModal();
-                }
-            });
-
-            document.getElementById('backToHomeBtn').addEventListener('click', function () {
-                window.location.href = 'index.html';
-            });
+                backToHomeBtn.addEventListener('click', function () {
+                    window.location.href = 'index.html';
+                });
+            }
         }
     </script>
 </body>
