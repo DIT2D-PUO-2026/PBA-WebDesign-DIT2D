@@ -133,8 +133,8 @@
                 const localSupabaseConfig = window.SUPABASE_LOCAL_CONFIG || {};
                 const injectedSupabaseUrl = '__SUPABASE_URL__';
                 const injectedSupabaseAnonKey = '__SUPABASE_ANON_KEY__';
-                const hasInjectedUrl = Boolean(injectedSupabaseUrl) && !injectedSupabaseUrl.startsWith('__SUPABASE_');
-                const hasInjectedAnonKey = Boolean(injectedSupabaseAnonKey) && !injectedSupabaseAnonKey.startsWith('__SUPABASE_');
+                const hasInjectedUrl = injectedSupabaseUrl.trim() !== '' && !injectedSupabaseUrl.startsWith('__SUPABASE_');
+                const hasInjectedAnonKey = injectedSupabaseAnonKey.trim() !== '' && !injectedSupabaseAnonKey.startsWith('__SUPABASE_');
 
                 const supabaseUrl = window.SUPABASE_URL || localSupabaseConfig.url || (hasInjectedUrl ? injectedSupabaseUrl : '');
                 const supabaseAnonKey = window.SUPABASE_ANON_KEY || localSupabaseConfig.anonKey || (hasInjectedAnonKey ? injectedSupabaseAnonKey : '');
