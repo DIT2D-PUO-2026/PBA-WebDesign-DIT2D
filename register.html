@@ -314,16 +314,41 @@
             const backToHomeBtn = document.getElementById('backToHomeBtn');
 
             if (registerPage && successModal && closeSuccessModalBtn && registrationForm && backToHomeBtn) {
+                let previousFocusedElement = null;
+
+                function canReceiveFocus(element) {
+                    return Boolean(
+                        element &&
+                        typeof element.focus === 'function' &&
+                        !element.hasAttribute('disabled') &&
+                        element.getAttribute('aria-hidden') !== 'true' &&
+                        element.tabIndex >= -1 &&
+                        element.getClientRects().length > 0
+                    );
+                }
+
                 function showSuccessModal() {
+                    const activeElement = document.activeElement;
+                    previousFocusedElement = activeElement && activeElement !== document.body ? activeElement : null;
                     registerPage.classList.add('page-blur');
                     successModal.style.display = 'flex';
                     successModal.setAttribute('aria-hidden', 'false');
+                    closeSuccessModalBtn.focus();
                 }
 
                 function hideSuccessModal() {
                     successModal.style.display = 'none';
                     successModal.setAttribute('aria-hidden', 'true');
                     registerPage.classList.remove('page-blur');
+
+                    if (previousFocusedElement && document.body.contains(previousFocusedElement) && canReceiveFocus(previousFocusedElement)) {
+                        previousFocusedElement.focus();
+                    } else {
+                        const submitButton = registrationForm.querySelector('[type="submit"]');
+                        if (canReceiveFocus(submitButton)) {
+                            submitButton.focus();
+                        }
+                    }
                 }
 
                 registrationForm.addEventListener('submit', function (event) {
@@ -341,6 +366,7 @@
                     const errorAlert = document.getElementById('errorAlert');
                     if (valid) {
                         errorAlert.classList.add('d-none');
+                        errorAlert.textContent = '';
                         form.reset();
                         form.querySelectorAll('.is-valid').forEach(function (el) {
                             el.classList.remove('is-valid');
@@ -348,6 +374,7 @@
                         showSuccessModal();
                     } else {
                         errorAlert.classList.add('d-none');
+                        errorAlert.textContent = '';
                     }
                 });
 
@@ -368,9 +395,6 @@
                     document.addEventListener('keyup', window.__registerSuccessModalEscHandler);
                 }
 
-                backToHomeBtn.addEventListener('click', function () {
-                    window.location.href = 'index.html';
-                });
             }
         }
     </script>
