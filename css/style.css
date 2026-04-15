@@ -64,3 +64,6 @@ body,
 .btn-outline-light:hover {
     color: #0f172a;
 }
+.btn-primary{
+    background-color: aqua !important;
+}
