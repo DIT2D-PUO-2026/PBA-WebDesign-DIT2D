@@ -60,11 +60,6 @@
             </div>
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <div id="registrationSuccessModal" class="jquery-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="successModalTitle" aria-hidden="true">
         <div class="jquery-modal-content">
             <h2 id="successModalTitle" class="h4 mb-3">Registration Successful</h2>
@@ -72,6 +67,11 @@
             <button type="button" id="closeSuccessModalBtn" class="btn btn-warning text-dark fw-semibold">OK</button>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function validateFormElements(getValue, setState) {
             const fullName = getValue('fullName');
@@ -123,9 +123,9 @@
 
         if (window.jQuery) {
             $(document).on('pagecreate', '#registerPage', function () {
-                const supabaseUrl = window.SUPABASE_URL || 'https://YOUR_PROJECT_ID.supabase.co';
-                const supabaseAnonKey = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
-                const isSupabaseConfigured = !supabaseUrl.includes('YOUR_PROJECT_ID') && !supabaseAnonKey.includes('YOUR_SUPABASE_ANON_KEY');
+                const supabaseUrl = window.SUPABASE_URL || '';
+                const supabaseAnonKey = window.SUPABASE_ANON_KEY || '';
+                const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
                 const supabaseClient = window.supabase && isSupabaseConfigured
                     ? window.supabase.createClient(supabaseUrl, supabaseAnonKey)
                     : null;
@@ -140,12 +140,20 @@
 
                 function showSuccessModal() {
                     $('#registerPage').addClass('page-blur');
-                    $('#registrationSuccessModal').css('display', 'flex').hide().fadeIn(200).attr('aria-hidden', 'false');
+                    $('#registrationSuccessModal')
+                        .stop(true, true)
+                        .css({ display: 'flex', opacity: 0 })
+                        .attr('aria-hidden', 'false')
+                        .animate({ opacity: 1 }, 200);
                 }
 
                 function hideSuccessModal() {
-                    $('#registrationSuccessModal').fadeOut(200).attr('aria-hidden', 'true');
-                    $('#registerPage').removeClass('page-blur');
+                    $('#registrationSuccessModal')
+                        .stop(true, true)
+                        .animate({ opacity: 0 }, 200, function () {
+                            $(this).css('display', 'none').attr('aria-hidden', 'true');
+                            $('#registerPage').removeClass('page-blur');
+                        });
                 }
 
                 $('#registrationForm').on('submit', async function (event) {
@@ -170,7 +178,8 @@
                     }
 
                     if (!supabaseClient) {
-                        showError('Supabase is not configured yet. Set window.SUPABASE_URL and window.SUPABASE_ANON_KEY in this page.');
+                        showError('Registration is currently unavailable. Please try again later.');
+                        console.error('Supabase is not configured. Define window.SUPABASE_URL and window.SUPABASE_ANON_KEY before submitting.');
                         return;
                     }
 
@@ -196,7 +205,8 @@
                         $(form).find('.is-valid').removeClass('is-valid');
                         showSuccessModal();
                     } catch (error) {
-                        showError(error.message || 'Unable to submit registration right now. Please try again later.');
+                        console.error('Supabase registration insert failed:', error);
+                        showError('Unable to submit registration right now. Please try again later.');
                     } finally {
                         submitButton.prop('disabled', false).text('Submit');
                     }
@@ -212,7 +222,7 @@
                     }
                 });
 
-                $(document).on('keyup', function (event) {
+                $(document).off('keyup.successModal').on('keyup.successModal', function (event) {
                     if (event.key === 'Escape' && $('#registrationSuccessModal').is(':visible')) {
                         hideSuccessModal();
                     }
