@@ -208,7 +208,6 @@
         function mapDatabaseError(error) {
             const message = (error && error.message ? error.message : '').toLowerCase();
             const details = (error && error.details ? error.details : '').toLowerCase();
-
             if (message.includes("could not find the 'category' column") || details.includes('category')) {
                 return 'Database table users_profile does not have a category column. Remove it from insert payload or add the column in Supabase.';
             }
@@ -297,6 +296,8 @@
             if (insertResult.error) {
                 throw insertResult.error;
             }
+
+            return insertResult;
 
         }
 
