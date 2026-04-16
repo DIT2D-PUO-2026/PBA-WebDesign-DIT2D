@@ -1,6 +1,6 @@
 body,
 .ui-page {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    background: linear-gradient(180deg, #121212 0%, #2C2C2C 50%, #D90429 100%);
     color: #e2e8f0;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -26,10 +26,6 @@ body,
 
 }
 
-.ui-content {
-    padding-top: 1rem;
-    background: linear-gradient(180deg, #121212 0%, #2C2C2C 50%, #D90429 100%);
-}
 
 .card {
     background: rgba(30, 41, 59, 0.92);

@@ -12,10 +12,31 @@
 
 <body>
     <div data-role="page" id="registerPage" class="event-page">
-        <div data-role="header" data-position="fixed" class="event-header text-center py-4">
-            <h1 class="mb-1">Register for Esports Participation Day</h1>
-            <p class="mb-0">Secure your tournament slot now.</p>
-        </div>
+        <nav data-role="header" class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
+            <div class="container">
+                <a class="navbar-brand" href="#">Tech Club</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a data-ajax="false" class="nav-link" href="index.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="register.html">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a data-ajax="false" class="nav-link" href="#contact">Contact</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
         <div role="main" class="ui-content">
             <div class="container py-4">
@@ -33,53 +54,65 @@
                     <div class="mb-3">
                         <label for="phone" class="form-label">Phone Number</label>
                         <input type="text" class="form-control" id="phone" placeholder="Enter phone number" required>
-                        <div class="invalid-feedback">Phone number must contain at least 10 digits.</div>
+                        <div class="invalid-feedback">Phone number must contain digits only.</div>
                     </div>
                     <div class="mb-3">
                         <label for="institution" class="form-label">Institution</label>
-                        <input type="text" class="form-control" id="institution" placeholder="Enter institution"
-                            required>
+                        <input type="text" class="form-control" id="institution" placeholder="Enter institution" required>
                         <div class="invalid-feedback">Please enter institution name.</div>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" placeholder="Create a password"
-                            minlength="6" required>
-                        <div class="invalid-feedback">Password must be at least 6 characters.</div>
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" required>
+                            <option value="" selected disabled>Select category</option>
+                            <option value="Student">Student</option>
+                            <option value="Visitor">Visitor</option>
+                            <option value="Lecturer">Lecturer</option>
+                        </select>
+                        <div class="invalid-feedback">Please choose a category.</div>
                     </div>
-                    <div id="errorAlert" class="alert alert-danger d-none" role="alert" aria-live="polite"></div>
-                    <div id="successAlert" class="alert alert-success d-none" role="alert" aria-live="polite">
-                        Registration submitted successfully!</div>
-                    <div class="d-flex flex-wrap gap-2">
-                        <button type="submit" class="btn btn-warning text-dark fw-semibold">Submit</button>
-                        <a href="index.html" id="backToHomeBtn" class="btn btn-outline-light">Back to Event
-                            Information</a>
-                    </div>
+                    <div id="successAlert" class="alert alert-success d-none" role="alert" aria-live="polite">Registration submitted successfully!</div>
+
                 </form>
             </div>
         </div>
-    </div>
-    <div id="registrationSuccessModal" class="jquery-modal-overlay" role="dialog" aria-modal="true"
-        aria-labelledby="successModalTitle" aria-hidden="true">
-        <div class="jquery-modal-content">
-            <h2 id="successModalTitle" class="h4 mb-3">Registration Successful</h2>
-            <p class="mb-4">Thank you. Your registration has been saved to our database.</p>
-            <button type="button" id="closeSuccessModalBtn" class="btn btn-warning text-dark fw-semibold">OK</button>
-        </div>
+                    <footer id="contact" data-role="footer" class="footer bg-dark text-white py-3 mt-5">
+                <div class="container text-center">
+                    <h2 class="h4 mb-3">Contact Us</h2>
+
+                    <div class="d-flex justify-content-center flex-wrap gap-3">
+                        <a href="tel:+60111222333"  class="contacts"
+                            data-bs-toggle="tooltip" data-bs-title="Call event hotline">
+                            <i class="bi bi-telephone"></i> Tel:+60111222333
+                        </a>
+
+                        <a href="mailto:esports@techclub.edu" class="contacts"
+                            data-bs-toggle="tooltip" data-bs-title="Email organizer">
+                            <i class="bi bi-envelope"></i> Email:esports@techclub.edu
+                        </a>
+
+                        <a class="contacts" href="sms:+60111222333?body=Hi%20Tech%20Club,%20I%20want%20to%20join%20Esports%20Participation%20Day%202026."
+                            data-bs-title="Send SMS inquiry" data-bs-toggle="tooltip">
+                            <i class="bi bi-chat-dots"></i> SMS:+60111222333
+                        </a>
+                    </div>
+
+                    <hr class="my-4 border-secondary">
+                    <p class="small text-secondary mb-0 text-white">© 2026 Esports Participation Day | Tech Club</p>
+                </div>
+            </footer>
     </div>
 
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-local.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function validateFormElements(getValue, setState) {
+        function validateFormElements(getValue, setState, showSuccess, hideSuccess, resetForm, clearValid) {
             const fullName = getValue('fullName');
             const email = getValue('email');
             const phone = getValue('phone');
             const institution = getValue('institution');
-            const password = getValue('password');
+            const category = getValue('category');
             let valid = true;
 
             if (!fullName.trim()) {
@@ -112,70 +145,28 @@
                 setState('institution', true);
             }
 
-            if (password.trim().length < 6) {
-                setState('password', false);
+            if (!category) {
+                setState('category', false);
                 valid = false;
             } else {
-                setState('password', true);
+                setState('category', true);
             }
 
-            return valid;
+            if (valid) {
+                showSuccess();
+                resetForm();
+                clearValid();
+            } else {
+                hideSuccess();
+            }
         }
 
         if (window.jQuery) {
-            function initializeRegisterPage() {
-                const registerPage = $('#registerPage');
-                if (!registerPage.length || registerPage.data('registrationInitialized')) {
-                    return;
-                }
-                registerPage.data('registrationInitialized', true);
-
-                const localSupabaseConfig = window.SUPABASE_LOCAL_CONFIG || {};
-                const placeholderPrefix = '__SUPABASE_';
-                const urlPlaceholder = placeholderPrefix + 'URL__';
-                const anonKeyPlaceholder = placeholderPrefix + 'ANON_KEY__';
-                const injectedSupabaseUrl = '__SUPABASE_URL__';
-                const injectedSupabaseAnonKey = '__SUPABASE_ANON_KEY__';
-                const hasInjectedUrl = injectedSupabaseUrl.trim() !== '' && injectedSupabaseUrl !== urlPlaceholder;
-                const hasInjectedAnonKey = injectedSupabaseAnonKey.trim() !== '' && injectedSupabaseAnonKey !== anonKeyPlaceholder;
-
-                const supabaseUrl = window.SUPABASE_URL || localSupabaseConfig.url || (hasInjectedUrl ? injectedSupabaseUrl : '');
-                const supabaseAnonKey = window.SUPABASE_ANON_KEY || localSupabaseConfig.anonKey || (hasInjectedAnonKey ? injectedSupabaseAnonKey : '');
-                const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
-                const supabaseClient = window.supabase && isSupabaseConfigured
-                    ? window.supabase.createClient(supabaseUrl, supabaseAnonKey)
-                    : null;
-
-                function showError(message) {
-                    $('#errorAlert').text(message).removeClass('d-none');
-                }
-
-                function hideError() {
-                    $('#errorAlert').addClass('d-none').text('');
-                }
-
-                function showSuccessModal() {
-                    $('#registerPage').addClass('page-blur');
-                    $('#registrationSuccessModal')
-                        .stop(true, true)
-                        .css({ display: 'flex', opacity: 0 })
-                        .attr('aria-hidden', 'false')
-                        .animate({ opacity: 1 }, 200);
-                }
-
-                function hideSuccessModal() {
-                    $('#registrationSuccessModal')
-                        .stop(true, true)
-                        .animate({ opacity: 0 }, 200, function () {
-                            $(this).css('display', 'none').attr('aria-hidden', 'true');
-                            $('#registerPage').removeClass('page-blur');
-                        });
-                }
-
-                $('#registrationForm').on('submit', async function (event) {
+            $(document).on('pagecreate', '#registerPage', function () {
+                $('#registrationForm').on('submit', function (event) {
                     event.preventDefault();
                     const form = this;
-                    const valid = validateFormElements(
+                    validateFormElements(
                         function (id) { return $('#' + id).val(); },
                         function (id, isValid) {
                             const field = $('#' + id);
@@ -184,117 +175,12 @@
                             } else {
                                 field.addClass('is-invalid').removeClass('is-valid');
                             }
-                        }
+                        },
+                        function () { $('#successAlert').removeClass('d-none'); },
+                        function () { $('#successAlert').addClass('d-none'); },
+                        function () { form.reset(); },
+                        function () { $(form).find('.is-valid').removeClass('is-valid'); }
                     );
-
-                    $('#successAlert').addClass('d-none');
-                    if (!valid) {
-                        hideError();
-                        return;
-                    }
-
-                    if (!supabaseClient) {
-                        showError('Registration is currently unavailable. Please try again later.');
-                        console.error('Supabase is not configured. For local server, define window.SUPABASE_LOCAL_CONFIG in supabase-local.js. For GitHub Pages, inject __SUPABASE_URL__ and __SUPABASE_ANON_KEY__ from GitHub Secrets during deployment.');
-                        return;
-                    }
-
-                    const submitButton = $(form).find('button[type="submit"]');
-                    submitButton.prop('disabled', true).text('Submitting...');
-                    hideError();
-
-                    //check duplicated data before insert to provide more specific feedback to users and avoid relying solely on database constraints for error handling
-                    try {
-                        const fullName = $('#fullName').val().trim();
-                        const email = $('#email').val().trim().toLowerCase();
-                        const phone = Number($('#phone').val().trim());
-                        const institution = $('#institution').val().trim();
-                        const password = $('#password').val().trim();
-
-                        const [nameCheck, emailCheck, phoneCheck] = await Promise.all([
-                            supabaseClient.from('users_profile').select('id').eq('full_name', fullName).limit(1),
-                            supabaseClient.from('users_profile').select('id').ilike('email', email).limit(1),
-                            supabaseClient.from('users_profile').select('id').eq('phone', phone).limit(1)
-                        ]);
-
-                        const duplicateCheckError = nameCheck.error || emailCheck.error || phoneCheck.error;
-                        if (duplicateCheckError) {
-                            throw duplicateCheckError;
-                        }
-
-                        const duplicateMessages = [];
-
-                        if (nameCheck.data && nameCheck.data.length > 0) {
-                            $('#fullName').addClass('is-invalid').removeClass('is-valid');
-                            duplicateMessages.push('Full name already exists.');
-                        }
-
-                        if (emailCheck.data && emailCheck.data.length > 0) {
-                            $('#email').addClass('is-invalid').removeClass('is-valid');
-                            duplicateMessages.push('Email already exists.');
-                        }
-
-                        if (phoneCheck.data && phoneCheck.data.length > 0) {
-                            $('#phone').addClass('is-invalid').removeClass('is-valid');
-                            duplicateMessages.push('Phone number already exists.');
-                        }
-
-                        if (duplicateMessages.length > 0) {
-                            showError('Account already exists: ' + duplicateMessages.join(' '));
-                            return;
-                        }
-
-                        const payload = {
-                            full_name: fullName,
-                            email: email,
-                            phone: phone,
-                            institution: institution,
-                            password: password
-                        };
-
-                        const { error } = await supabaseClient.from('users_profile').insert([payload]);
-                        if (error) {
-                            throw error;
-                        }
-
-                        form.reset();
-                        $(form).find('.is-valid').removeClass('is-valid');
-                        showSuccessModal();
-                    } catch (error) {
-                        console.error('Supabase registration insert failed:', error);
-                        if (error && error.code === '23505') {
-                            const details = String(error.details || '').toLowerCase();
-                            if (details.includes('email')) {
-                                showError('Email already exists. Please use a different email.');
-                            } else if (details.includes('phone')) {
-                                showError('Phone number already exists. Please use a different phone number.');
-                            } else if (details.includes('full_name')) {
-                                showError('Full name already exists. Please check your details.');
-                            } else {
-                                showError('Account data already exists. Please use different details.');
-                            }
-                        } else {
-                            showError('Unable to submit registration right now. Please try again later.');
-                        }
-                    } finally {
-                        submitButton.prop('disabled', false).text('Submit');
-                    }
-                });
-
-                $('#closeSuccessModalBtn').on('click', function () {
-                    hideSuccessModal();
-                });
-
-                $('#registrationSuccessModal').on('click', function (event) {
-                    if (event.target === this) {
-                        hideSuccessModal();
-                    }
-                });
-
-                $(document).off('keyup.successModal').on('keyup.successModal', function (event) {
-                    if (event.key === 'Escape' && $('#registrationSuccessModal').is(':visible')) {
-                        hideSuccessModal();
-                    }
                 });
 
                 $('#backToHomeBtn').on('click', function (event) {
@@ -305,100 +191,32 @@
                         window.location.href = 'index.html';
                     }
                 });
-            }
-
-            $(document).on('pagecreate', '#registerPage', initializeRegisterPage);
-            $(initializeRegisterPage);
+            });
         } else {
-            const registerPage = document.getElementById('registerPage');
-            const successModal = document.getElementById('registrationSuccessModal');
-            const closeSuccessModalBtn = document.getElementById('closeSuccessModalBtn');
-            const registrationForm = document.getElementById('registrationForm');
-            const backToHomeBtn = document.getElementById('backToHomeBtn');
-
-            if (registerPage && successModal && closeSuccessModalBtn && registrationForm && backToHomeBtn) {
-                let previousFocusedElement = null;
-
-                function canReceiveFocus(element) {
-                    return Boolean(
-                        element &&
-                        typeof element.focus === 'function' &&
-                        !element.hasAttribute('disabled') &&
-                        element.getAttribute('aria-hidden') !== 'true' &&
-                        element.tabIndex >= -1 &&
-                        element.getClientRects().length > 0
-                    );
-                }
-
-                function showSuccessModal() {
-                    const activeElement = document.activeElement;
-                    previousFocusedElement = activeElement && activeElement !== document.body ? activeElement : null;
-                    registerPage.classList.add('page-blur');
-                    successModal.style.display = 'flex';
-                    successModal.setAttribute('aria-hidden', 'false');
-                    closeSuccessModalBtn.focus();
-                }
-
-                function hideSuccessModal() {
-                    successModal.style.display = 'none';
-                    successModal.setAttribute('aria-hidden', 'true');
-                    registerPage.classList.remove('page-blur');
-
-                    if (previousFocusedElement && document.body.contains(previousFocusedElement) && canReceiveFocus(previousFocusedElement)) {
-                        previousFocusedElement.focus();
-                    } else {
-                        const submitButton = registrationForm.querySelector('[type="submit"]');
-                        if (canReceiveFocus(submitButton)) {
-                            submitButton.focus();
-                        }
-                    }
-                }
-
-                registrationForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    const form = this;
-                    const valid = validateFormElements(
-                        function (id) { return document.getElementById(id).value; },
-                        function (id, isValid) {
-                            const field = document.getElementById(id);
-                            field.classList.toggle('is-invalid', !isValid);
-                            field.classList.toggle('is-valid', isValid);
-                        }
-                    );
-
-                    const errorAlert = document.getElementById('errorAlert');
-                    if (valid) {
-                        errorAlert.classList.add('d-none');
-                        errorAlert.textContent = '';
-                        form.reset();
+            document.getElementById('registrationForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const form = this;
+                validateFormElements(
+                    function (id) { return document.getElementById(id).value; },
+                    function (id, isValid) {
+                        const field = document.getElementById(id);
+                        field.classList.toggle('is-invalid', !isValid);
+                        field.classList.toggle('is-valid', isValid);
+                    },
+                    function () { document.getElementById('successAlert').classList.remove('d-none'); },
+                    function () { document.getElementById('successAlert').classList.add('d-none'); },
+                    function () { form.reset(); },
+                    function () {
                         form.querySelectorAll('.is-valid').forEach(function (el) {
                             el.classList.remove('is-valid');
                         });
-                        showSuccessModal();
-                    } else {
-                        errorAlert.classList.add('d-none');
-                        errorAlert.textContent = '';
                     }
-                });
+                );
+            });
 
-                closeSuccessModalBtn.addEventListener('click', hideSuccessModal);
-
-                successModal.addEventListener('click', function (event) {
-                    if (event.target === successModal) {
-                        hideSuccessModal();
-                    }
-                });
-
-                if (!window.__registerSuccessModalEscHandler) {
-                    window.__registerSuccessModalEscHandler = function (event) {
-                        if (event.key === 'Escape' && successModal.getAttribute('aria-hidden') === 'false') {
-                            hideSuccessModal();
-                        }
-                    };
-                    document.addEventListener('keyup', window.__registerSuccessModalEscHandler);
-                }
-
-            }
+            document.getElementById('backToHomeBtn').addEventListener('click', function () {
+                window.location.href = 'index.html';
+            });
         }
     </script>
 </body>
