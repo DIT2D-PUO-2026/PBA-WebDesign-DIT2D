@@ -71,11 +71,6 @@
                         </select>
                         <div class="invalid-feedback">Please choose a category.</div>
                     </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" placeholder="Create password" required>
-                        <div class="invalid-feedback">Password must be at least 8 characters.</div>
-                    </div>
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">Register</button>
                     </div>
@@ -195,29 +190,24 @@
             status.textContent = '';
         }
 
-        function showSuccessModal(referenceId) {
+        function showSuccessModal() {
             const modalElement = document.getElementById('registrationSuccessModal');
             const successMessage = document.getElementById('registrationSuccessMessage');
 
             if (successMessage) {
-                successMessage.textContent = 'Your registration has been submitted successfully. Reference ID: ' + referenceId;
+                successMessage.textContent = 'Your registration has been submitted successfully.';
             }
 
             if (window.bootstrap && modalElement) {
                 window.bootstrap.Modal.getOrCreateInstance(modalElement).show();
             } else {
-                window.alert('Registration submitted successfully. Reference ID: ' + referenceId);
+                window.alert('Registration submitted successfully.');
             }
         }
 
         function mapDatabaseError(error) {
             const message = (error && error.message ? error.message : '').toLowerCase();
             const details = (error && error.details ? error.details : '').toLowerCase();
-
-            if (message.includes('null value in column') && message.includes('password')) {
-                return 'Database rejected the request because password is required.';
-            }
-
             if (message.includes("could not find the 'category' column") || details.includes('category')) {
                 return 'Database table users_profile does not have a category column. Remove it from insert payload or add the column in Supabase.';
             }
@@ -243,7 +233,6 @@
             const phone = getValue('phone').trim();
             const institution = getValue('institution').trim();
             const category = getValue('category');
-            const password = getValue('password').trim();
             let valid = true;
 
             if (!fullName) {
@@ -282,21 +271,14 @@
                 setState('category', true);
             }
 
-            if (password.length < 8) {
-                setState('password', false);
-                valid = false;
-            } else {
-                setState('password', true);
-            }
-
             return {
                 valid: valid,
                 payload: {
                     full_name: fullName,
                     email: email,
-                    phone: Number(phone),
+                    phone: phone,
                     institution: institution,
-                    password: password
+                    category: category
                 }
             };
         }
@@ -310,30 +292,11 @@
 
             const insertResult = await client
                 .from('users_profile')
-                .insert([payload])
-                .select('id, created_at')
-                .single();
+                .insert([payload]);
 
             if (insertResult.error) {
                 throw insertResult.error;
             }
-
-            const insertedRow = insertResult.data;
-            const verifyResult = await client
-                .from('users_profile')
-                .select('id')
-                .eq('id', insertedRow.id)
-                .maybeSingle();
-
-            if (verifyResult.error) {
-                throw new Error('Insert succeeded but verification query failed: ' + verifyResult.error.message);
-            }
-
-            if (!verifyResult.data) {
-                throw new Error('Insert returned success, but the row could not be verified in database.');
-            }
-
-            return insertedRow;
         }
 
         function setSubmitting(form, isSubmitting) {
@@ -376,9 +339,9 @@
             updateSubmitStatus('info', 'Submitting registration to database...');
 
             try {
-                const insertedRow = await submitRegistration(validationResult.payload);
-                updateSubmitStatus('success', 'Registration saved to database. Reference ID: ' + insertedRow.id);
-                showSuccessModal(insertedRow.id);
+                await submitRegistration(validationResult.payload);
+                updateSubmitStatus('success', 'Registration saved to database.');
+                showSuccessModal();
 
                 form.reset();
                 form.querySelectorAll('.is-valid').forEach(function (field) {
