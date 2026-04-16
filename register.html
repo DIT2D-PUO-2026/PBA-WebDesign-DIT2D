@@ -22,13 +22,13 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link active" href="index.html">Home</a>
+                            <a data-ajax="false" class="nav-link active" href="index.html">Home</a>
                         </li>
                         <li class="nav-item">
                             <a data-ajax="false" class="nav-link" href="index.html">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="register.html">Register</a>
+                            <a data-ajax="false" class="nav-link" href="register.html">Register</a>
                         </li>
                         <li class="nav-item">
                             <a data-ajax="false" class="nav-link" href="#contact">Contact</a>
@@ -40,7 +40,7 @@
 
         <div role="main" class="ui-content">
             <div class="container py-4">
-                <form id="registrationForm" class="card p-4 shadow-sm border-0" novalidate>
+                <form id="registrationForm" class="card p-4 shadow-sm border-0" data-ajax="false" novalidate>
                     <div class="mb-3">
                         <label for="fullName" class="form-label">Full Name</label>
                         <input type="text" class="form-control" id="fullName" placeholder="Enter full name" required>
@@ -168,6 +168,19 @@
             return supabaseClient;
         }
 
+        function createDemoPassword(seedValue) {
+            const normalizedSeed = (typeof seedValue === 'string' ? seedValue : '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '')
+                .slice(0, 12);
+
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                return 'event_' + normalizedSeed + '_' + window.crypto.randomUUID();
+            }
+
+            return 'event_' + normalizedSeed + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+        }
+
         function updateSubmitStatus(type, message) {
             const status = document.getElementById('submitStatus');
             if (!status) {
@@ -208,12 +221,25 @@
         function mapDatabaseError(error) {
             const message = (error && error.message ? error.message : '').toLowerCase();
             const details = (error && error.details ? error.details : '').toLowerCase();
+
             if (message.includes("could not find the 'category' column") || details.includes('category')) {
                 return 'Database table users_profile does not have a category column. Remove it from insert payload or add the column in Supabase.';
             }
 
+            if (message.includes("could not find the 'password' column")) {
+                return 'Database table users_profile does not have a password column. Remove it from insert payload or add the column in Supabase.';
+            }
+
+            if (message.includes('null value in column "password"')) {
+                return 'Database requires password, but no value was accepted. Check users_profile constraints or triggers.';
+            }
+
             if (message.includes('duplicate key') || details.includes('already exists')) {
                 return 'A registration with the same unique value already exists.';
+            }
+
+            if (message.includes('row-level security') || message.includes('violates row-level security')) {
+                return 'Insert is blocked by RLS policy. Allow insert for anon role in users_profile policies.';
             }
 
             if (message.includes('failed to fetch') || message.includes('network')) {
@@ -273,30 +299,84 @@
 
             return {
                 valid: valid,
+                category: category,
                 payload: {
                     full_name: fullName,
                     email: email,
                     phone: phone,
                     institution: institution,
-                    category: category
+                    password: createDemoPassword(email)
                 }
             };
         }
 
-        async function submitRegistration(payload) {
+        async function submitRegistration(payload, category) {
             const client = getSupabaseClient();
 
             if (!client) {
                 throw new Error('Supabase is not configured. Check supabase-local.js and Supabase client script loading.');
             }
 
-            const insertResult = await client
-                .from('users_profile')
-                .insert([payload]);
+            const basePayload = {
+                full_name: payload.full_name,
+                email: payload.email,
+                phone: payload.phone,
+                institution: payload.institution
+            };
 
-            if (insertResult.error) {
-                throw insertResult.error;
+            const withPasswordPayload = Object.assign({}, basePayload, {
+                password: payload.password
+            });
+
+            const candidatePayloads = [];
+
+            if (category) {
+                candidatePayloads.push(Object.assign({}, withPasswordPayload, { category: category }));
             }
+
+            candidatePayloads.push(withPasswordPayload);
+
+            if (category) {
+                candidatePayloads.push(Object.assign({}, basePayload, { category: category }));
+            }
+
+            candidatePayloads.push(basePayload);
+
+            const triedPayloadSignatures = new Set();
+            let lastError = null;
+
+            for (let index = 0; index < candidatePayloads.length; index += 1) {
+                const attemptPayload = candidatePayloads[index];
+                const signature = Object.keys(attemptPayload).sort().join(',');
+
+                if (triedPayloadSignatures.has(signature)) {
+                    continue;
+                }
+
+                triedPayloadSignatures.add(signature);
+
+                const insertResult = await client
+                    .from('users_profile')
+                    .insert([attemptPayload]);
+
+                if (!insertResult.error) {
+                    return true;
+                }
+
+                lastError = insertResult.error;
+
+                const message = (insertResult.error.message ? insertResult.error.message : '').toLowerCase();
+                const recoverableSchemaError =
+                    message.includes("could not find the 'category' column") ||
+                    message.includes("could not find the 'password' column") ||
+                    message.includes('null value in column "password"');
+
+                if (!recoverableSchemaError) {
+                    break;
+                }
+            }
+
+            throw lastError || new Error('Unable to insert registration into users_profile.');
         }
 
         function setSubmitting(form, isSubmitting) {
@@ -339,7 +419,7 @@
             updateSubmitStatus('info', 'Submitting registration to database...');
 
             try {
-                await submitRegistration(validationResult.payload);
+                await submitRegistration(validationResult.payload, validationResult.category);
                 updateSubmitStatus('success', 'Registration saved to database.');
                 showSuccessModal();
 
@@ -348,6 +428,7 @@
                     field.classList.remove('is-valid');
                 });
             } catch (error) {
+                console.error('Registration submit failed:', error);
                 updateSubmitStatus('danger', mapDatabaseError(error));
             } finally {
                 setSubmitting(form, false);
@@ -366,6 +447,10 @@
 
         if (window.jQuery) {
             $(document).on('pagecreate', '#registerPage', function () {
+                bindRegistrationForm();
+            });
+
+            $(document).on('pageshow', '#registerPage', function () {
                 bindRegistrationForm();
             });
         }

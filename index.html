@@ -28,7 +28,7 @@
                             <a data-ajax="false" class="nav-link" href="#about">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="register.html">Register</a>
+                            <a data-ajax="false" class="nav-link" href="register.html">Register</a>
                         </li>
                         <li class="nav-item">
                             <a data-ajax="false" class="nav-link" href="#contact">Contact</a>
@@ -237,19 +237,18 @@
                         });
                     }
 
-                    $('#registerNowBtn').on('click', function (event) {
+                    $(document).on('click', '#registerNowBtn', function (event) {
                         event.preventDefault();
-                        if ($.mobile) {
-                            $.mobile.changePage('register.html', { transition: 'slide' });
-                        } else {
-                            window.location.href = 'register.html';
-                        }
+                        window.location.href = 'register.html';
                     });
                 });
             } else {
-                document.getElementById('registerNowBtn').addEventListener('click', function () {
-                    window.location.href = 'register.html';
-                });
+                const registerNowBtn = document.getElementById('registerNowBtn');
+                if (registerNowBtn) {
+                    registerNowBtn.addEventListener('click', function () {
+                        window.location.href = 'register.html';
+                    });
+                }
             }
         </script>
 </body>
