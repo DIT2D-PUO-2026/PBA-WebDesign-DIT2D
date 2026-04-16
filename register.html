@@ -71,7 +71,9 @@
                         </select>
                         <div class="invalid-feedback">Please choose a category.</div>
                     </div>
-                    <div id="successAlert" class="alert alert-success d-none" role="alert" aria-live="polite">Registration submitted successfully!</div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                    </div>
 
                 </form>
             </div>
@@ -101,6 +103,23 @@
                     <p class="small text-secondary mb-0 text-white">© 2026 Esports Participation Day | Tech Club</p>
                 </div>
             </footer>
+    </div>
+
+    <div class="modal fade" id="registrationSuccessModal" tabindex="-1" aria-labelledby="registrationSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registrationSuccessModalLabel">Registration Successful</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Your registration has been submitted successfully.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -163,6 +182,11 @@
 
         if (window.jQuery) {
             $(document).on('pagecreate', '#registerPage', function () {
+                const modalElement = document.getElementById('registrationSuccessModal');
+                const successModal = (window.bootstrap && modalElement)
+                    ? window.bootstrap.Modal.getOrCreateInstance(modalElement)
+                    : null;
+
                 $('#registrationForm').on('submit', function (event) {
                     event.preventDefault();
                     const form = this;
@@ -176,47 +200,61 @@
                                 field.addClass('is-invalid').removeClass('is-valid');
                             }
                         },
-                        function () { $('#successAlert').removeClass('d-none'); },
-                        function () { $('#successAlert').addClass('d-none'); },
+                        function () {
+                            if (successModal) {
+                                successModal.show();
+                            } else {
+                                window.alert('Registration submitted successfully!');
+                            }
+                        },
+                        function () {
+                            if (successModal) {
+                                successModal.hide();
+                            }
+                        },
                         function () { form.reset(); },
                         function () { $(form).find('.is-valid').removeClass('is-valid'); }
                     );
                 });
-
-                $('#backToHomeBtn').on('click', function (event) {
-                    event.preventDefault();
-                    if ($.mobile) {
-                        $.mobile.changePage('index.html', { transition: 'slide', reverse: true });
-                    } else {
-                        window.location.href = 'index.html';
-                    }
-                });
             });
         } else {
-            document.getElementById('registrationForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const form = this;
-                validateFormElements(
-                    function (id) { return document.getElementById(id).value; },
-                    function (id, isValid) {
-                        const field = document.getElementById(id);
-                        field.classList.toggle('is-invalid', !isValid);
-                        field.classList.toggle('is-valid', isValid);
-                    },
-                    function () { document.getElementById('successAlert').classList.remove('d-none'); },
-                    function () { document.getElementById('successAlert').classList.add('d-none'); },
-                    function () { form.reset(); },
-                    function () {
-                        form.querySelectorAll('.is-valid').forEach(function (el) {
-                            el.classList.remove('is-valid');
-                        });
-                    }
-                );
-            });
+            const form = document.getElementById('registrationForm');
+            const modalElement = document.getElementById('registrationSuccessModal');
+            const successModal = (window.bootstrap && modalElement)
+                ? window.bootstrap.Modal.getOrCreateInstance(modalElement)
+                : null;
 
-            document.getElementById('backToHomeBtn').addEventListener('click', function () {
-                window.location.href = 'index.html';
-            });
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    validateFormElements(
+                        function (id) { return document.getElementById(id).value; },
+                        function (id, isValid) {
+                            const field = document.getElementById(id);
+                            field.classList.toggle('is-invalid', !isValid);
+                            field.classList.toggle('is-valid', isValid);
+                        },
+                        function () {
+                            if (successModal) {
+                                successModal.show();
+                            } else {
+                                window.alert('Registration submitted successfully!');
+                            }
+                        },
+                        function () {
+                            if (successModal) {
+                                successModal.hide();
+                            }
+                        },
+                        function () { form.reset(); },
+                        function () {
+                            form.querySelectorAll('.is-valid').forEach(function (el) {
+                                el.classList.remove('is-valid');
+                            });
+                        }
+                    );
+                });
+            }
         }
     </script>
 </body>
