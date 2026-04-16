@@ -296,14 +296,13 @@
 
             const insertResult = await client
                 .from('users_profile')
-                .insert([payload])
-                .select('id')
-                .maybeSingle();
+                .insert([payload]);
 
             if (insertResult.error) {
                 throw insertResult.error;
             }
-            return insertResult.data || null;
+
+            return null;
         }
 
         function setSubmitting(form, isSubmitting) {
@@ -347,7 +346,7 @@
 
             try {
                 const insertedRow = await submitRegistration(validationResult.payload);
-                const referenceId = insertedRow && insertedRow.id ? insertedRow.id : null;
+                const referenceId = insertedRow?.id ?? null;
                 updateSubmitStatus('success', referenceId
                     ? 'Registration saved to database. Reference ID: ' + referenceId
                     : 'Registration saved to database.');
