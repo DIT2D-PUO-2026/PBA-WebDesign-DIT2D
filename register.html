@@ -420,7 +420,7 @@
 
             try {
                 await submitRegistration(validationResult.payload, validationResult.category);
-                updateSubmitStatus('success', 'Registration saved to database.');
+                updateSubmitStatus('success', 'Registration submitted successfully!');
                 showSuccessModal();
 
                 form.reset();
