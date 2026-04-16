@@ -190,22 +190,18 @@
             status.textContent = '';
         }
 
-        function showSuccessModal(referenceId) {
+        function showSuccessModal() {
             const modalElement = document.getElementById('registrationSuccessModal');
             const successMessage = document.getElementById('registrationSuccessMessage');
 
             if (successMessage) {
-                successMessage.textContent = referenceId
-                    ? 'Your registration has been submitted successfully. Reference ID: ' + referenceId
-                    : 'Your registration has been submitted successfully.';
+                successMessage.textContent = 'Your registration has been submitted successfully.';
             }
 
             if (window.bootstrap && modalElement) {
                 window.bootstrap.Modal.getOrCreateInstance(modalElement).show();
             } else {
-                window.alert(referenceId
-                    ? 'Registration submitted successfully. Reference ID: ' + referenceId
-                    : 'Registration submitted successfully.');
+                window.alert('Registration submitted successfully.');
             }
         }
 
@@ -302,7 +298,6 @@
                 throw insertResult.error;
             }
 
-            return null;
         }
 
         function setSubmitting(form, isSubmitting) {
@@ -345,12 +340,9 @@
             updateSubmitStatus('info', 'Submitting registration to database...');
 
             try {
-                const insertedRow = await submitRegistration(validationResult.payload);
-                const referenceId = insertedRow?.id ?? null;
-                updateSubmitStatus('success', referenceId
-                    ? 'Registration saved to database. Reference ID: ' + referenceId
-                    : 'Registration saved to database.');
-                showSuccessModal(referenceId);
+                await submitRegistration(validationResult.payload);
+                updateSubmitStatus('success', 'Registration saved to database.');
+                showSuccessModal();
 
                 form.reset();
                 form.querySelectorAll('.is-valid').forEach(function (field) {
